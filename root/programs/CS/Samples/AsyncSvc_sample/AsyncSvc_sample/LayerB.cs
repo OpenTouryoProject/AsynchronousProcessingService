@@ -100,6 +100,8 @@ namespace AsyncSvc_sample
 
         #region Member methods
 
+        #region Utilityメソッド
+
         /// <summary>
         ///  Converts base64 string to deserialized byte array.
         /// </summary>
@@ -113,21 +115,6 @@ namespace AsyncSvc_sample
                 deserializeData = CustomEncode.FromBase64String(base64String);
             }
             return deserializeData;
-        }
-
-        /// <summary>
-        ///  Converts byte array to serialized base64 string
-        /// </summary>
-        /// <param name="arrayData">byte array</param>
-        /// <returns>base64 string</returns>
-        public static string SerializeToBase64String(byte[] arrayData)
-        {
-            string base64String = string.Empty;
-            if (arrayData != null)
-            {
-                CustomEncode.ToBase64String(arrayData);
-            }
-            return base64String;
         }
 
         /// <summary>
@@ -175,7 +162,30 @@ namespace AsyncSvc_sample
             // Calls data access part of asynchronous processing service.
             LayerD myDao = new LayerD(this.GetDam(this.DamKeyforAMT));
             myDao.UpdateTaskProgress(asyncParameterValue, userReturnValue);
-        }       
+        }
+
+        /// <summary>
+        ///  Updates the command of selected task
+        /// </summary>
+        /// <param name="taskID">Task ID</param>
+        /// <param name="commandId">Command ID</param>
+        /// <param name="userReturnValue">user parameter value</param>
+        private void UpdateTaskCommand(int taskID, int commandId, AsyncProcessingServiceReturnValue userReturnValue)
+        {
+            // Sets parameters of AsyncProcessingServiceParameterValue to update the command of selected task.
+            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "UpdateTaskCommand", "UpdateTaskCommand", "SQL",
+                                                                         new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+            asyncParameterValue.TaskId = taskID;
+            asyncParameterValue.CommandId = commandId;
+
+            // Calls data access part of asynchronous processing service.
+            LayerD myDao = new LayerD(this.GetDam(this.DamKeyforAMT));
+            myDao.UpdateTaskCommand(asyncParameterValue, userReturnValue);
+        }
+
+        #endregion
+
+        #region 非同期タスクの実行
 
         /// <summary>
         /// Initiate the processing of asynchronous task.
@@ -282,24 +292,7 @@ namespace AsyncSvc_sample
             return randProgressRate.Next(lastProgressRate + 1, SUCCESS_STATE + 1);
         }
 
-        /// <summary>
-        ///  Updates the command of selected task
-        /// </summary>
-        /// <param name="taskID">Task ID</param>
-        /// <param name="commandId">Command ID</param>
-        /// <param name="userReturnValue">user parameter value</param>
-        private void UpdateTaskCommand(int taskID, int commandId, AsyncProcessingServiceReturnValue userReturnValue)
-        {
-            // Sets parameters of AsyncProcessingServiceParameterValue to update the command of selected task.
-            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "UpdateTaskCommand", "UpdateTaskCommand", "SQL",
-                                                                         new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
-            asyncParameterValue.TaskId = taskID;
-            asyncParameterValue.CommandId = commandId;
-
-            // Calls data access part of asynchronous processing service.
-            LayerD myDao = new LayerD(this.GetDam(this.DamKeyforAMT));
-            myDao.UpdateTaskCommand(asyncParameterValue, userReturnValue);
-        }
+        #endregion
 
         #endregion
     }       

@@ -20,6 +20,7 @@ using System;
 
 using Touryo.Infrastructure.Business.AsyncProcessingService;
 using Touryo.Infrastructure.Business.Util;
+using Touryo.Infrastructure.Public.Str;
 using Touryo.Infrastructure.Public.Db;
 
 namespace TestAsyncSvc_Sample
@@ -36,21 +37,44 @@ namespace TestAsyncSvc_Sample
             program.InsertData();
         }
 
+        #region Utilityメソッド
+
+        /// <summary>
+        ///  Converts byte array to serialized base64 string
+        /// </summary>
+        /// <param name="arrayData">byte array</param>
+        /// <returns>base64 string</returns>
+        public static string SerializeToBase64String(byte[] arrayData)
+        {
+            string base64String = string.Empty;
+            if (arrayData != null)
+            {
+                CustomEncode.ToBase64String(arrayData);
+            }
+            return base64String;
+        }
+
+        #endregion
+
+        #region 非同期タスクの投入
+
         /// <summary>
         /// Inserts asynchronous task information to the database
         /// </summary>
-        /// <returns></returns>
+        /// <returns>AsyncProcessingServiceParameterValue</returns>
         public AsyncProcessingServiceParameterValue InsertData()
         {
             // Create array data to serilize.
             byte[] arrayData = { 1, 2, 3, 4, 5 };
 
             // Sets parameters of AsyncProcessingServiceParameterValue to insert asynchronous task information.
-            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "InsertTask", "InsertTask", "SQL",
-                                                                            new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue(
+                "AsyncProcessingService", "InsertTask", "InsertTask", "SQL",
+                new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+
             asyncParameterValue.UserId = "A";
             asyncParameterValue.ProcessName = "AAA";
-            asyncParameterValue.Data = AsyncSvc_sample.LayerB.SerializeToBase64String(arrayData);
+            asyncParameterValue.Data = Program.SerializeToBase64String(arrayData);
             asyncParameterValue.ExecutionStartDateTime = DateTime.Now;
             asyncParameterValue.RegistrationDateTime = DateTime.Now;
             asyncParameterValue.NumberOfRetries = 0;
@@ -68,5 +92,7 @@ namespace TestAsyncSvc_Sample
             asyncReturnValue = (AsyncProcessingServiceReturnValue)layerB.DoBusinessLogic((AsyncProcessingServiceParameterValue)asyncParameterValue, iso);
             return asyncParameterValue;
         }
+
+        #endregion
     }
 }

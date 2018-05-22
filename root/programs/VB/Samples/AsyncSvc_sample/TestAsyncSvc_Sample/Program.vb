@@ -18,6 +18,7 @@
 
 Imports Touryo.Infrastructure.Business.AsyncProcessingService
 Imports Touryo.Infrastructure.Business.Util
+Imports Touryo.Infrastructure.Public.Str
 Imports Touryo.Infrastructure.Public.Db
 
 Namespace TestAsyncSvc_Sample
@@ -31,13 +32,32 @@ Namespace TestAsyncSvc_Sample
             program.InsertData()
         End Sub
 
-		''' <summary>
-		''' Inserts asynchronous task information to the database
-		''' </summary>
-		''' <returns></returns>
-		Public Function InsertData() As AsyncProcessingServiceParameterValue
-			' Create array data to serilize.
-			Dim arrayData As Byte() = {1, 2, 3, 4, 5}
+#Region "Utilityメソッド"
+
+        ''' <summary>
+        '''  Converts byte array to serialized base64 string
+        ''' </summary>
+        ''' <param name="arrayData">byte array</param>
+        ''' <returns>base64 string</returns>
+        Public Shared Function SerializeToBase64String(arrayData As Byte()) As String
+            Dim base64String As String = String.Empty
+            If arrayData IsNot Nothing Then
+                CustomEncode.ToBase64String(arrayData)
+            End If
+            Return base64String
+        End Function
+
+#End Region
+
+#Region "非同期タスクの投入"
+
+        ''' <summary>
+        ''' Inserts asynchronous task information to the database
+        ''' </summary>
+        ''' <returns>AsyncProcessingServiceParameterValue</returns>
+        Public Function InsertData() As AsyncProcessingServiceParameterValue
+            ' Create array data to serilize.
+            Dim arrayData As Byte() = {1, 2, 3, 4, 5}
 
             ' Sets parameters of AsyncProcessingServiceParameterValue to insert asynchronous task information.
             Dim asyncParameterValue As New AsyncProcessingServiceParameterValue(
@@ -45,24 +65,27 @@ Namespace TestAsyncSvc_Sample
                 New MyUserInfo("AsyncProcessingService", "AsyncProcessingService"))
 
             asyncParameterValue.UserId = "A"
-			asyncParameterValue.ProcessName = "AAA"
-            asyncParameterValue.Data = AsyncSvc_sample.AsyncSvc_sample.LayerB.SerializeToBase64String(arrayData)
-			asyncParameterValue.ExecutionStartDateTime = DateTime.Now
-			asyncParameterValue.RegistrationDateTime = DateTime.Now
-			asyncParameterValue.NumberOfRetries = 0
-			asyncParameterValue.ProgressRate = 0
-			asyncParameterValue.CompletionDateTime = DateTime.Now
-			asyncParameterValue.StatusId = CInt(AsyncProcessingServiceParameterValue.AsyncStatus.Register)
-			asyncParameterValue.CommandId = 0
-			asyncParameterValue.ReservedArea = "xxxxxx"
+            asyncParameterValue.ProcessName = "AAA"
+            asyncParameterValue.Data = Program.SerializeToBase64String(arrayData)
+            asyncParameterValue.ExecutionStartDateTime = DateTime.Now
+            asyncParameterValue.RegistrationDateTime = DateTime.Now
+            asyncParameterValue.NumberOfRetries = 0
+            asyncParameterValue.ProgressRate = 0
+            asyncParameterValue.CompletionDateTime = DateTime.Now
+            asyncParameterValue.StatusId = CInt(AsyncProcessingServiceParameterValue.AsyncStatus.Register)
+            asyncParameterValue.CommandId = 0
+            asyncParameterValue.ReservedArea = "xxxxxx"
 
-			Dim iso As DbEnum.IsolationLevelEnum = DbEnum.IsolationLevelEnum.DefaultTransaction
-			Dim asyncReturnValue As AsyncProcessingServiceReturnValue
+            Dim iso As DbEnum.IsolationLevelEnum = DbEnum.IsolationLevelEnum.DefaultTransaction
+            Dim asyncReturnValue As AsyncProcessingServiceReturnValue
 
             ' Execute do business logic method.
             Dim layerB As New LayerB()
             asyncReturnValue = DirectCast(layerB.DoBusinessLogic(DirectCast(asyncParameterValue, AsyncProcessingServiceParameterValue), iso), AsyncProcessingServiceReturnValue)
-			Return asyncParameterValue
-		End Function
-	End Class
+            Return asyncParameterValue
+        End Function
+
+#End Region
+
+    End Class
 End Namespace

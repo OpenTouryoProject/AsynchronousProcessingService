@@ -38,18 +38,19 @@ Namespace AsyncSvc_sample
 	''' LayerB class for AsyncProcessing service sample
 	''' </summary>
 	Public Class LayerB
-		Inherits MyApsBaseLogic
-		#Region "Member declartion"
+        Inherits MyApsBaseLogic
 
-		' Number of seconds
-		Private NumberOfSeconds As Integer
+#Region "Member declartion"
 
-		#End Region
+        ' Number of seconds
+        Private NumberOfSeconds As Integer
 
-		#Region "Member initialization"
+#End Region
 
-		''' <summary>Constructor</summary>
-		Public Sub New()
+#Region "Member initialization"
+
+        ''' <summary>Constructor</summary>
+        Public Sub New()
 			' Number of seconds to sleep the thread.
 			Dim numberOfSeconds As String = GetConfigParameter.GetConfigValue("FxSleepUserProcess")
 			If Not String.IsNullOrEmpty(numberOfSeconds) Then
@@ -59,16 +60,18 @@ Namespace AsyncSvc_sample
 			End If
 		End Sub
 
-		#End Region
+#End Region
 
-		#Region "Member methods"
+#Region "Member methods"
 
-		''' <summary>
-		'''  Converts base64 string to deserialized byte array.
-		''' </summary>
-		''' <param name="base64String">Base64 String</param>
-		''' <returns>byte array</returns>
-		Private Function DeserializeFromBase64String(base64String As String) As Byte()
+#Region "Utilityメソッド"
+
+        ''' <summary>
+        '''  Converts base64 string to deserialized byte array.
+        ''' </summary>
+        ''' <param name="base64String">Base64 String</param>
+        ''' <returns>byte array</returns>
+        Private Function DeserializeFromBase64String(base64String As String) As Byte()
 			Dim deserializeData As Byte() = Nothing
 			If String.IsNullOrEmpty(base64String) Then
 				deserializeData = CustomEncode.FromBase64String(base64String)
@@ -76,25 +79,12 @@ Namespace AsyncSvc_sample
 			Return deserializeData
 		End Function
 
-		''' <summary>
-		'''  Converts byte array to serialized base64 string
-		''' </summary>
-		''' <param name="arrayData">byte array</param>
-		''' <returns>base64 string</returns>
-		Public Shared Function SerializeToBase64String(arrayData As Byte()) As String
-			Dim base64String As String = String.Empty
-			If arrayData IsNot Nothing Then
-				CustomEncode.ToBase64String(arrayData)
-			End If
-			Return base64String
-		End Function
-
-		''' <summary>
-		'''  Get command information from database. 
-		''' </summary>
-		''' <param name="taskID">asynchronous task id</param>
+        ''' <summary>
+        '''  Get command information from database. 
+        ''' </summary>
+        ''' <param name="taskID">asynchronous task id</param>
         ''' <param name="userReturnValue">asynchronous return value</param>
-		Private Sub GetCommandValue(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
+        Private Sub GetCommandValue(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
 			' Sets parameters of AsyncProcessingServiceParameterValue to get command value.
 			Dim asyncParameterValue As New AsyncProcessingServiceParameterValue("AsyncProcessingService", "SelectCommand", "SelectCommand", "SQL", New MyUserInfo("AsyncProcessingService", "AsyncProcessingService"))
 			asyncParameterValue.TaskId = taskID
@@ -137,11 +127,15 @@ Namespace AsyncSvc_sample
 			myDao.UpdateTaskProgress(asyncParameterValue, userReturnValue)
 		End Sub
 
-		''' <summary>
-		''' Initiate the processing of asynchronous task.
-		''' </summary>
-		''' <param name="userParameterValue">asynchronous parameter values</param>
-		Public Sub UOC_Start(userParameterValue As AsyncProcessingServiceParameterValue)
+#End Region
+
+#Region "非同期タスクの実行"
+
+        ''' <summary>
+        ''' Initiate the processing of asynchronous task.
+        ''' </summary>
+        ''' <param name="userParameterValue">asynchronous parameter values</param>
+        Public Sub UOC_Start(userParameterValue As AsyncProcessingServiceParameterValue)
 			' Generates a return value class.
 			Dim userReturnValue As New AsyncProcessingServiceReturnValue()
 			Me.ReturnValue = userReturnValue
@@ -164,12 +158,13 @@ Namespace AsyncSvc_sample
 			Me.Update(userParameterValue.TaskId, userReturnValue)
 		End Sub
 
-		''' <summary>
-		'''  Updates the progress rate and handles abnormal termination of the process.
-		''' </summary>
-		''' <param name="taskID">Task ID</param>
-		''' <param name="userReturnValue">user parameter value</param>
-		Private Sub Update(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
+
+        ''' <summary>
+        '''  Updates the progress rate and handles abnormal termination of the process.
+        ''' </summary>
+        ''' <param name="taskID">Task ID</param>
+        ''' <param name="userReturnValue">user parameter value</param>
+        Private Sub Update(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
 			' Place the following statements in the loop, till the completion of task.
 			' AsyncProcess: Loop-Start
 
@@ -200,6 +195,9 @@ Namespace AsyncSvc_sample
 			Return
 		End Sub
 
-		#End Region
-	End Class
+#End Region
+
+#End Region
+
+    End Class
 End Namespace

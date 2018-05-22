@@ -78,12 +78,6 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AsyncSvc_sample\AsyncSvc_sample.vbproj">
-      <Project>{396d8b5d-92ac-46b3-a97b-6fc11bdfa47e}</Project>
-      <Name>AsyncSvc_sample</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
