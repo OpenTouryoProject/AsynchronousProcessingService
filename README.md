@@ -1,5 +1,5 @@
 # Asynchronous processing service
-*Asynchronous processing service* is an asynchronous processing infrastructure that uses DBMS as a queue by Windows service.
+*Asynchronous processing service* is an asynchronous processing infrastructure for Windows services that uses DBMS as a queue.
 
 For more information of Asynchronous processing service, refer the following site. (The following site is only displayed in Japanese.)
 
