@@ -37,198 +37,210 @@
 Imports Touryo.Infrastructure.Business.Business
 
 Namespace Touryo.Infrastructure.Business.AsyncProcessingService
-	#Region "LayerB"
+#Region "LayerB"
 
-	''' <summary>
-	''' LayerB class for AsyncProcessing Service
-	''' </summary>
-	Public Class LayerB
-		Inherits MyFcBaseLogic
-		#Region "Insert"
+    ''' <summary>
+    ''' LayerB class for AsyncProcessing Service
+    ''' </summary>
+    Public Class LayerB
+        Inherits MyFcBaseLogic
+#Region "Insert"
 
-		''' <summary>
-		''' Inserts Async Parameter values to Database through LayerD 
-		''' </summary>
-		''' <param name="asyncParameterValue"></param>
-		Public Sub UOC_InsertTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			' 戻り値クラスを生成して、事前に戻り値に設定しておく。
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        ''' Inserts Async Parameter values to Database through LayerD 
+        ''' </summary>
+        ''' <param name="asyncParameterValue"></param>
+        Public Sub UOC_InsertTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            ' 戻り値クラスを生成して、事前に戻り値に設定しておく。
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.InsertTask(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.InsertTask(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "Update"
+#Region "Update"
 
-		#Region "UpdateTaskStart"
+#Region "UpdateTaskStart"
 
-		''' <summary>
-		'''  Updates information in the database that the asynchronous task is started
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskStart(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates information in the database that the asynchronous task is started
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskStart(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskStart(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskStart(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "UpdateTaskRetry"
+#Region "UpdateTaskRetry"
 
-		''' <summary>
-		'''  Updates information in the database that the asynchronous task is failed and can be retried later
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskRetry(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates information in the database that the asynchronous task is failed and can be retried later
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskRetry(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskRetry(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskRetry(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "UpdateTaskFail"
+#Region "UpdateTaskFail"
 
-		''' <summary>
-		'''  Updates information in the database that the asynchronous task is failed and abort this task [status=Abort] 
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskFail(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates information in the database that the asynchronous task is failed and abort this task [status=Abort] 
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskFail(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskFail(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskFail(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "UpdateTaskSuccess"
+#Region "UpdateTaskSuccess"
 
-		''' <summary>
-		'''  Updates information in the database that the asynchronous task is completed
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskSuccess(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates information in the database that the asynchronous task is completed
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskSuccess(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskSuccess(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskSuccess(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "UpdateTaskProgress"
+#Region "UpdateTaskProgress"
 
-		''' <summary>
-		'''  Updates progress rate of the asynchronous task in the database.
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskProgress(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates progress rate of the asynchronous task in the database.
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskProgress(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskProgress(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskProgress(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "UpdateTaskCommand"
+#Region "UpdateTaskCommand"
 
-		''' <summary>
-		'''  Updates command value information of a selected asynchronous task
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_UpdateTaskCommand(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Updates command value information of a selected asynchronous task
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_UpdateTaskCommand(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.UpdateTaskCommand(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.UpdateTaskCommand(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "StopAllTask"
+#Region "StopAllTask"
 
-		''' <summary>
-		'''  Set stop command for all running asynchronous task
-		''' </summary>
-		''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
-		Private Sub UOC_StopAllTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        '''  Set stop command for all running asynchronous task
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Asynchronous Parameter Values</param>
+        Private Sub UOC_StopAllTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.StopAllTask(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.StopAllTask(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#End Region
+#End Region
 
-		#Region "Select"
+#Region "Select"
 
-		#Region "SelectCommand"
+#Region "SelectCommand"
 
-		''' <summary>
-		''' Selects user command from Database through LayerD 
-		''' </summary>
-		''' <param name="asyncParameterValue"></param>
-		Private Sub UOC_SelectCommand(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        ''' Selects user command from Database through LayerD 
+        ''' </summary>
+        ''' <param name="asyncParameterValue"></param>
+        Private Sub UOC_SelectCommand(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.SelectCommand(asyncParameterValue, asyncReturnValue)
-		End Sub
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.SelectCommand(asyncParameterValue, asyncReturnValue)
+        End Sub
 
-		#End Region
+#End Region
 
-		#Region "SelectTask"
+#Region "SelectTask"
 
-		''' <summary>
-		''' Selects Asynchronous task from LayerD 
-		''' </summary>
-		''' <param name="asyncParameterValue">Async Parameter Value</param>
-		Private Sub UOC_SelectTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
-			Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
-			Me.ReturnValue = asyncReturnValue
+        ''' <summary>
+        ''' Selects Asynchronous task from LayerD 
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Async Parameter Value</param>
+        Private Sub UOC_SelectTask(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim asyncReturnValue As New AsyncProcessingServiceReturnValue()
+            Me.ReturnValue = asyncReturnValue
 
-			Dim myDao As New LayerD(Me.GetDam())
-			myDao.SelectTask(asyncParameterValue, asyncReturnValue)
+            Dim myDao As New LayerD(Me.GetDam())
+            myDao.SelectTask(asyncParameterValue, asyncReturnValue)
 
-			Dim dt As DataTable = DirectCast(asyncReturnValue.Obj, DataTable)
-			asyncReturnValue.Obj = Nothing
+            Dim dt As DataTable = DirectCast(asyncReturnValue.Obj, DataTable)
+            asyncReturnValue.Obj = Nothing
 
-			If dt IsNot Nothing Then
-				If dt.Rows.Count <> 0 Then
-					asyncReturnValue.TaskId = Convert.ToInt32(dt.Rows(0)("Id"))
-					asyncReturnValue.UserId = dt.Rows(0)("UserId").ToString()
-					asyncReturnValue.ProcessName = dt.Rows(0)("ProcessName").ToString()
-					asyncReturnValue.Data = dt.Rows(0)("Data").ToString()
-					asyncReturnValue.NumberOfRetries = Convert.ToInt32(dt.Rows(0)("NumberOfRetries"))
-					asyncReturnValue.ReservedArea = dt.Rows(0)("ReservedArea").ToString()
-					asyncReturnValue.CommandId = Convert.ToInt32(dt.Rows(0)("CommandId"))
-				End If
-			End If
-		End Sub
+            If dt IsNot Nothing Then
+                If dt.Rows.Count <> 0 Then
+                    asyncReturnValue.TaskId = Convert.ToInt32(dt.Rows(0)("Id"))
+                    asyncReturnValue.UserId = dt.Rows(0)("UserId").ToString()
+                    asyncReturnValue.ProcessName = dt.Rows(0)("ProcessName").ToString()
+                    asyncReturnValue.Data = dt.Rows(0)("Data").ToString()
+                    asyncReturnValue.NumberOfRetries = Convert.ToInt32(dt.Rows(0)("NumberOfRetries"))
+                    asyncReturnValue.ReservedArea = dt.Rows(0)("ReservedArea").ToString()
+                    asyncReturnValue.CommandId = Convert.ToInt32(dt.Rows(0)("CommandId"))
+                End If
+            End If
+        End Sub
 
-		#End Region
+#End Region
 
-		#End Region
-	End Class
+#End Region
 
-	#End Region
+#Region "TestConnection"
+
+        ''' <summary>
+        ''' Tests the connection with the specified database
+        ''' </summary>
+        ''' <param name="asyncParameterValue">Async Parameter Value</param>
+        Private Sub UOC_TestConnection(asyncParameterValue As AsyncProcessingServiceParameterValue)
+            Dim myDao As New LayerD(Me.GetDam())
+        End Sub
+
+#End Region
+    End Class
+
+#End Region
 End Namespace
 

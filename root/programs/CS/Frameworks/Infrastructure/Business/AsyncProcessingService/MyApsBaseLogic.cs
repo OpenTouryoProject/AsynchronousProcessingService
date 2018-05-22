@@ -54,7 +54,7 @@ using Touryo.Infrastructure.Public.Db;
 using Touryo.Infrastructure.Public.Log;
 using Touryo.Infrastructure.Public.Util;
 
-namespace Touryo.Infrastructure.Business.Business
+namespace Touryo.Infrastructure.Business.AsyncProcessingService
 {
     /// <summary>自動振り分け機能付き業務コード親クラス２（サーバ用）（テンプレート）</summary>
     /// <remarks>（オーバーライドして）自由に利用できる。</remarks>

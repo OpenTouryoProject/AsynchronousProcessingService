@@ -54,47 +54,47 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			MyBase.New(dam)
 		End Sub
 
-		#Region "SetSqlByFile3"
+#Region "SetSqlByFile3"
 
-		''' <summary>
-		'''  Get SQL query from the embedded resource assembly
-		''' </summary>
-		Public Sub SetSqlByFile3(filename As String)
-			' SQLファイルのEncoding情報の取得
-			Dim sqlEncoding As String = GetConfigParameter.GetConfigValue(PubLiteral.SQL_ENCODING)
+        '''' <summary>
+        ''''  Get SQL query from the embedded resource assembly
+        '''' </summary>
+        'Public Sub SetSqlByFile3(filename As String)
+        '	' SQLファイルのEncoding情報の取得
+        '	Dim sqlEncoding As String = GetConfigParameter.GetConfigValue(PubLiteral.SQL_ENCODING)
 
-			If String.IsNullOrEmpty(sqlEncoding) Then
-				' デフォルト：UTF-8
-				sqlEncoding = "utf-8"
-			End If
+        '	If String.IsNullOrEmpty(sqlEncoding) Then
+        '		' デフォルト：UTF-8
+        '		sqlEncoding = "utf-8"
+        '	End If
 
-			Dim assemblyString As String = "Business"
+        '	Dim assemblyString As String = "Business"
 
-			' Get SQL query from embedded resource file. 
-            Dim commandText As String = EmbeddedResourceLoader.LoadAsString(assemblyString, filename, Encoding.GetEncoding(sqlEncoding))
+        '	' Get SQL query from embedded resource file. 
+        '          Dim commandText As String = EmbeddedResourceLoader.LoadAsString(assemblyString, filename, Encoding.GetEncoding(sqlEncoding))
 
-			' Set sql command as text
-			Me.SetSqlByCommand(commandText)
-		End Sub
+        '	' Set sql command as text
+        '	Me.SetSqlByCommand(commandText)
+        'End Sub
 
-		#End Region
+#End Region
 
-		#Region "Insert"
+#Region "Insert"
 
-		''' <summary>
-		''' Inserts async parameter values to database
-		''' </summary>
-		''' <param name="asyncParameterValue"></param>
-		''' <param name="asyncReturnValue"></param>
-		Public Sub InsertTask(asyncParameterValue As AsyncProcessingServiceParameterValue, asyncReturnValue As AsyncProcessingServiceReturnValue)
+        ''' <summary>
+        ''' Inserts async parameter values to database
+        ''' </summary>
+        ''' <param name="asyncParameterValue"></param>
+        ''' <param name="asyncReturnValue"></param>
+        Public Sub InsertTask(asyncParameterValue As AsyncProcessingServiceParameterValue, asyncReturnValue As AsyncProcessingServiceReturnValue)
 			Dim filename As String = String.Empty
 			filename = "AsyncProcessingServiceInsert.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P2", asyncParameterValue.UserId)
+            ' Set SQL parameter values
+            Me.SetParameter("P2", asyncParameterValue.UserId)
 			Me.SetParameter("P3", asyncParameterValue.ProcessName)
 			Me.SetParameter("P4", asyncParameterValue.Data)
 			Me.SetParameter("P5", asyncParameterValue.RegistrationDateTime)
@@ -125,11 +125,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskStart.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.ExecutionStartDateTime)
 			Me.SetParameter("P3", asyncParameterValue.StatusId)
 			Me.SetParameter("P4", DBNull.Value)
@@ -151,11 +151,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskRetry.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.NumberOfRetries)
 			Me.SetParameter("P3", asyncParameterValue.CompletionDateTime)
 			Me.SetParameter("P4", asyncParameterValue.StatusId)
@@ -178,11 +178,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskFail.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.CompletionDateTime)
 			Me.SetParameter("P3", asyncParameterValue.StatusId)
 			Me.SetParameter("P4", asyncParameterValue.ExceptionInfo)
@@ -204,11 +204,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskSuccess.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.CompletionDateTime)
 			Me.SetParameter("P3", asyncParameterValue.ProgressRate)
 			Me.SetParameter("P4", asyncParameterValue.StatusId)
@@ -230,11 +230,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskProgress.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.ProgressRate)
 
 			' Execute SQL query
@@ -254,11 +254,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "UpdateTaskCommand.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 			Me.SetParameter("P2", asyncParameterValue.CommandId)
 
 			' Execute SQL query
@@ -278,11 +278,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "StopAllTask.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.StatusId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.StatusId)
 			Me.SetParameter("P2", asyncParameterValue.CommandId)
 
 			' Execute SQL query
@@ -306,11 +306,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "SelectCommand.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.TaskId)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.TaskId)
 
 			' Execute SQL query
 			asyncReturnValue.Obj = Me.ExecSelectScalar()
@@ -329,11 +329,11 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 			Dim filename As String = String.Empty
 			filename = "SelectTask.sql"
 
-			' Get SQL query from file.
-			Me.SetSqlByFile3(filename)
+            ' Get SQL query from file.
+            Me.SetSqlByFile2(filename)
 
-			' Set SQL parameter values
-			Me.SetParameter("P1", asyncParameterValue.RegistrationDateTime)
+            ' Set SQL parameter values
+            Me.SetParameter("P1", asyncParameterValue.RegistrationDateTime)
 			Me.SetParameter("P2", asyncParameterValue.NumberOfRetries)
 			Me.SetParameter("P3", CInt(AsyncProcessingServiceParameterValue.AsyncStatus.Register))
 			Me.SetParameter("P4", CInt(AsyncProcessingServiceParameterValue.AsyncStatus.AbnormalEnd))
