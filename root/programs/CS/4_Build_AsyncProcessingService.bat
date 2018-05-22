@@ -16,20 +16,11 @@ set CURRENT_DIR="%~dp0"
 call %CURRENT_DIR%z_Common.bat
 
 rem --------------------------------------------------
-rem Make the Directory.
-rem --------------------------------------------------
-md "Frameworks\Infrastructure\Temp"
-md "Frameworks\Infrastructure\Build"
-
-rem --------------------------------------------------
-rem Output xcopy after you build the batch Infrastructure(Business)
+rem Build the batch Infrastructure(AsyncProcessingService)
 rem --------------------------------------------------
 
-..\nuget.exe restore "Frameworks\Infrastructure\Business.sln"
-%BUILDFILEPATH% %COMMANDLINE% "Frameworks\Infrastructure\Business.sln"
-
-xcopy /E /Y "Frameworks\Infrastructure\Business\bin\%BUILD_CONFIG%" "Frameworks\Infrastructure\Temp\%BUILD_CONFIG%\"
-xcopy /E /Y "Frameworks\Infrastructure\Temp\%BUILD_CONFIG%" "Frameworks\Infrastructure\Build\"
+..\nuget.exe restore "Frameworks\Infrastructure\AsyncProcessingService.sln"
+%BUILDFILEPATH% %COMMANDLINE% "Frameworks\Infrastructure\AsyncProcessingService.sln"
 
 pause
 

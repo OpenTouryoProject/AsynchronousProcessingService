@@ -52,14 +52,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Frameworks\Infrastructure\Build\OpenTouryo.Business.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTouryo.Business.RichClient">
-      <HintPath>..\..\..\Frameworks\Infrastructure\Build\OpenTouryo.Business.RichClient.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTouryo.Framework">
       <HintPath>..\..\..\Frameworks\Infrastructure\Build\OpenTouryo.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTouryo.Framework.RichClient">
-      <HintPath>..\..\..\Frameworks\Infrastructure\Build\OpenTouryo.Framework.RichClient.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.Public">
       <HintPath>..\..\..\Frameworks\Infrastructure\Build\OpenTouryo.Public.dll</HintPath>
