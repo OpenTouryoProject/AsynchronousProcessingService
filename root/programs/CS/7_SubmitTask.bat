@@ -1,0 +1,1 @@
+call "Samples\AsyncSvc_sample\TestAsyncSvc_Sample\bin\Debug\TestAsyncSvc_Sample.exe"

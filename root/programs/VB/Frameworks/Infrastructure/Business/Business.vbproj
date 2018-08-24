@@ -60,19 +60,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTouryo.DamManagedOdp">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamManagedOdp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\OpenTouryo\root\programs\VB\Frameworks\Infrastructure\Build\OpenTouryo.DamManagedOdp.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.DamMySQL">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamMySQL.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\OpenTouryo\root\programs\VB\Frameworks\Infrastructure\Build\OpenTouryo.DamMySQL.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.DamPstGrS">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamPstGrS.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\OpenTouryo\root\programs\VB\Frameworks\Infrastructure\Build\OpenTouryo.DamPstGrS.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.Framework">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.Framework.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\OpenTouryo\root\programs\VB\Frameworks\Infrastructure\Build\OpenTouryo.Framework.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.Public">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.Public.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\OpenTouryo\root\programs\VB\Frameworks\Infrastructure\Build\OpenTouryo.Public.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -89,10 +89,11 @@
     <Import Include="System.Diagnostics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceParameterValue.vb" />
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceReturnValue.vb" />
-    <Compile Include="AsyncProcessingService\LayerB.vb" />
-    <Compile Include="AsyncProcessingService\LayerD.vb" />
+    <Compile Include="AsyncProcessingService\ApsLayerB.vb" />
+    <Compile Include="AsyncProcessingService\ApsLayerD.vb" />
+    <Compile Include="AsyncProcessingService\ApsParameterValue.vb" />
+    <Compile Include="AsyncProcessingService\ApsReturnValue.vb" />
+    <Compile Include="AsyncProcessingService\ApsUtility.vb" />
     <Compile Include="AsyncProcessingService\MyApsBaseLogic.vb" />
     <Compile Include="Business\MyFcBaseLogic.vb" />
     <Compile Include="Common\MyParameterValue.vb" />

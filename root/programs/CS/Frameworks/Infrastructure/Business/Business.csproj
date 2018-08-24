@@ -85,10 +85,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceParameterValue.cs" />
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceReturnValue.cs" />
-    <Compile Include="AsyncProcessingService\LayerB.cs" />
-    <Compile Include="AsyncProcessingService\LayerD.cs" />
+    <Compile Include="AsyncProcessingService\ApsUtility.cs" />
+    <Compile Include="AsyncProcessingService\ApsParameterValue.cs" />
+    <Compile Include="AsyncProcessingService\ApsReturnValue.cs" />
+    <Compile Include="AsyncProcessingService\ApsLayerB.cs" />
+    <Compile Include="AsyncProcessingService\ApsLayerD.cs" />
     <Compile Include="AsyncProcessingService\MyApsBaseLogic.cs" />
     <Compile Include="Business\MyFcBaseLogic.cs" />
     <Compile Include="Common\MyParameterValue.cs" />

@@ -19,13 +19,15 @@
 #endregion
 
 //**********************************************************************************
-//* クラス名        ：AsyncProcessingServiceParameterValue
-//* クラス日本語名  ：AsyncProcessingServiceParameterValue
+//* クラス名        ：ApsParameterValue
+//* クラス日本語名  ：ApsParameterValue
 //*
 //*  日時        更新者            内容
 //*  ----------  ----------------  -------------------------------------------------
 //*  11/28/2014  Supragyan         Paramter Value class for Asynchronous Processing Service
 //*  04/15/2015  Sandeep           Changed datatype of ProgressRate to decimal.
+//*  2018/08/24  西野 大介         クラス名称の変更（ ---> Aps）
+//*  2018/08/24  西野 大介         列挙型と列挙型処理クラスの移動
 //**********************************************************************************
 
 using System;
@@ -39,7 +41,7 @@ namespace Touryo.Infrastructure.Business.AsyncProcessingService
     /// <summary>
     /// Paramter Value class for Asynchronous Processing Service
     /// </summary>
-    public class AsyncProcessingServiceParameterValue : MyParameterValue
+    public class ApsParameterValue : MyParameterValue
     {
         /// <summary>汎用エリア</summary>
         public object Obj;
@@ -86,109 +88,13 @@ namespace Touryo.Infrastructure.Business.AsyncProcessingService
         #region コンストラクタ
 
         /// <summary>コンストラクタ</summary>
-        public AsyncProcessingServiceParameterValue(string screenId, string controlId, string methodName, string actionType, MyUserInfo user)
+        public ApsParameterValue(
+            string screenId, string controlId, string methodName, string actionType, MyUserInfo user)
             : base(screenId, controlId, methodName, actionType, user)
         {
             // Baseのコンストラクタに引数を渡すために必要。
         }
 
         #endregion
-
-        #region AsyncStatus
-
-        /// <summary>
-        /// AsyncStatus Enum for storing all status
-        /// </summary>
-        public enum AsyncStatus
-        {
-            /// <summary>Register</summary>
-            [StringValue("Register")]
-            Register = 1,
-
-            /// <summary>Processing</summary>
-            [StringValue("Processing")]
-            Processing,
-
-            /// <summary>End</summary>
-            [StringValue("End")]
-            End,
-
-            /// <summary>AbnormalEnd</summary>
-            [StringValue("AbnormalEnd")]
-            AbnormalEnd,
-
-            /// <summary>Abort</summary>
-            [StringValue("Abort")]
-            Abort,
-        }
-
-        #endregion
-
-        #region AsyncCommand
-
-        /// <summary>
-        /// AsyncCommand Enum for storing command values
-        /// </summary>
-        public enum AsyncCommand
-        {
-            /// <summary>Stop</summary>
-            [StringValue("Stop")]
-            Stop = 1,
-
-            /// <summary>Abort</summary>
-            [StringValue("Abort")]
-            Abort,
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    ///  To get the string value
-    /// </summary>
-    public class StringValueAttribute : System.Attribute
-    {
-        private string _value;
-
-        /// <summary>StringValueAttribute</summary>
-        /// <param name="value">value</param>
-        public StringValueAttribute(string value)
-        {
-            _value = value;
-        }
-
-        /// <summary>Value</summary>
-        public string Value
-        {
-            get { return _value; }
-        }
-    }
-
-    /// <summary>
-    ///  Class that holds the Enum values string
-    /// </summary>
-    public class StringEnum
-    {
-        /// <summary>
-        ///  To get the string value from Enum value
-        /// </summary>
-        /// <param name="value">Enum value</param>
-        /// <returns>String value of Enum</returns>
-        public static string GetStringValue(Enum value)
-        {
-            string output = null;
-            Type type = value.GetType();
-
-            // Gets the 'StringValueAttribute'
-            FieldInfo fi = type.GetField(value.ToString());
-            StringValueAttribute[] attrs =
-               fi.GetCustomAttributes(typeof(StringValueAttribute),
-                                       false) as StringValueAttribute[];
-            if (attrs.Length > 0)
-            {
-                output = attrs[0].Value;
-            }
-            return output;
-        }
     }
 }

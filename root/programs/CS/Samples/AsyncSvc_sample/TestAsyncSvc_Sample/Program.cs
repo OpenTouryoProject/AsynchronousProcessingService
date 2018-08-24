@@ -14,13 +14,17 @@
 //*  17/08/2015  Sandeep           Modified insert method name from 'Start' to 'InsertTask'.
 //*                                Modified object of LayerB that is related to Business project,
 //*                                instead of AsyncSvc_sample project. 
+//*  2018/08/24  西野 大介         SampleをBinaryからJSONのSerializeへ変更。
 //**********************************************************************************
 
 using System;
+using System.Collections.Generic;
+
+using Newtonsoft.Json;
 
 using Touryo.Infrastructure.Business.AsyncProcessingService;
 using Touryo.Infrastructure.Business.Util;
-using Touryo.Infrastructure.Public.Str;
+using Touryo.Infrastructure.Framework.AsyncProcessingService;
 using Touryo.Infrastructure.Public.Db;
 
 namespace TestAsyncSvc_Sample
@@ -36,61 +40,40 @@ namespace TestAsyncSvc_Sample
             Program program = new Program();
             program.InsertData();
         }
-
-        #region Utilityメソッド
-
-        /// <summary>
-        ///  Converts byte array to serialized base64 string
-        /// </summary>
-        /// <param name="arrayData">byte array</param>
-        /// <returns>base64 string</returns>
-        public static string SerializeToBase64String(byte[] arrayData)
-        {
-            string base64String = string.Empty;
-            if (arrayData != null)
-            {
-                CustomEncode.ToBase64String(arrayData);
-            }
-            return base64String;
-        }
-
-        #endregion
-
+        
         #region 非同期タスクの投入
 
         /// <summary>
         /// Inserts asynchronous task information to the database
         /// </summary>
-        /// <returns>AsyncProcessingServiceParameterValue</returns>
-        public AsyncProcessingServiceParameterValue InsertData()
+        /// <returns>ApsParameterValue</returns>
+        public ApsParameterValue InsertData()
         {
-            // Create array data to serilize.
-            byte[] arrayData = { 1, 2, 3, 4, 5 };
-
-            // Sets parameters of AsyncProcessingServiceParameterValue to insert asynchronous task information.
-            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue(
+            // Create list data to json serilize.
+            List<int> listData = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            
+            // Sets parameters of ApsParameterValue to insert asynchronous task information.
+            ApsParameterValue parameterValue = new ApsParameterValue(
                 "AsyncProcessingService", "InsertTask", "InsertTask", "SQL",
                 new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
 
-            asyncParameterValue.UserId = "A";
-            asyncParameterValue.ProcessName = "AAA";
-            asyncParameterValue.Data = Program.SerializeToBase64String(arrayData);
-            asyncParameterValue.ExecutionStartDateTime = DateTime.Now;
-            asyncParameterValue.RegistrationDateTime = DateTime.Now;
-            asyncParameterValue.NumberOfRetries = 0;
-            asyncParameterValue.ProgressRate = 0;
-            asyncParameterValue.CompletionDateTime = DateTime.Now;
-            asyncParameterValue.StatusId = (int)(AsyncProcessingServiceParameterValue.AsyncStatus.Register);
-            asyncParameterValue.CommandId = 0;
-            asyncParameterValue.ReservedArea = "xxxxxx";
+            parameterValue.UserId = "A";
+            parameterValue.ProcessName = "AAA";
+            parameterValue.Data = JsonConvert.SerializeObject(listData);
+            parameterValue.ExecutionStartDateTime = DateTime.Now;
+            parameterValue.RegistrationDateTime = DateTime.Now;
+            parameterValue.NumberOfRetries = 0;
+            parameterValue.ProgressRate = 0;
+            parameterValue.CompletionDateTime = DateTime.Now;
+            parameterValue.StatusId = (int)(AsyncStatus.Register);
+            parameterValue.CommandId = 0;
+            parameterValue.ReservedArea = "xxxxxx";
+            
+            ApsLayerB layerB = new ApsLayerB();
+            ApsReturnValue returnValue = (ApsReturnValue)layerB.DoBusinessLogic(
+                (ApsParameterValue)parameterValue, DbEnum.IsolationLevelEnum.DefaultTransaction);
 
-            DbEnum.IsolationLevelEnum iso = DbEnum.IsolationLevelEnum.DefaultTransaction;
-            AsyncProcessingServiceReturnValue asyncReturnValue;
-
-            // Execute do business logic method.
-            LayerB layerB = new LayerB();
-            asyncReturnValue = (AsyncProcessingServiceReturnValue)layerB.DoBusinessLogic((AsyncProcessingServiceParameterValue)asyncParameterValue, iso);
-            return asyncParameterValue;
+            return parameterValue;
         }
 
         #endregion
