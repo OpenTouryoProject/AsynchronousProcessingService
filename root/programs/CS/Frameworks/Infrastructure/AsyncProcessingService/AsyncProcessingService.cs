@@ -51,46 +51,29 @@
 //*                                Implemented code to 'Enable and Handle pre-shutdown notification' technique, to resolve the issue of 
 //*                                OnShutdown method, when you restart or shutdown the OS 
 //*  06/01/2016   Sandeep          Implemented '_isServiceException' property and 'SetServiceException' method, to enhance the Start and Stop behavior
+//*  2018/08/24  西野 大介         ログ詳細化と、デッドコードの削除
 //**********************************************************************************
 
 using System;
-using System.IO;
 using System.Threading;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.ServiceProcess;
 
 using Touryo.Infrastructure.Business.AsyncProcessingService;
 using Touryo.Infrastructure.Business.Util;
+using Touryo.Infrastructure.Framework.AsyncProcessingService;
 using Touryo.Infrastructure.Framework.Transmission;
 using Touryo.Infrastructure.Framework.Exceptions;
 using Touryo.Infrastructure.Framework.Common;
 using Touryo.Infrastructure.Framework.Util;
 using Touryo.Infrastructure.Public.Db;
-using Touryo.Infrastructure.Public.Str;
 using Touryo.Infrastructure.Public.Log;
 using Touryo.Infrastructure.Public.Util;
 
-namespace Touryo.Infrastructure.Framework.AsyncProcessingService
+namespace Touryo.Infrastructure.AsyncProcessingService
 {
-    /// <summary>Method names to update asynchronous task</summary>
-    public class AsyncTaskUpdate
-    {
-        /// <summary>Update start</summary>
-        public const string START = "UpdateTaskStart";
-
-        /// <summary>Update retry</summary>
-        public const string RETRY = "UpdateTaskRetry";
-
-        /// <summary>Update fail</summary>
-        public const string FAIL = "UpdateTaskFail";
-
-        /// <summary>Update success</summary>
-        public const string SUCCESS = "UpdateTaskSuccess";
-    }
-
     /// <summary>Asynchronous Processing Service class for windows service</summary>
-    public class AsyncProcessingService : System.ServiceProcess.ServiceBase
+    public class AsyncProcessingService : ServiceBase
     {
         #region Member variables
 
@@ -144,7 +127,9 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
             this.CanShutdown = true;
 
             // To enable pre-shutdown notification technique
-            FieldInfo acceptedCommandsFieldInfo = typeof(ServiceBase).GetField("acceptedCommands", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo acceptedCommandsFieldInfo = typeof(ServiceBase).GetField(
+                "acceptedCommands", BindingFlags.Instance | BindingFlags.NonPublic);
+
             if (acceptedCommandsFieldInfo == null)
             {
                 throw new ApplicationException(GetMessage.GetMessageDescription("E0009"));
@@ -165,10 +150,8 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
         /// </summary>
         public static void Main()
         {
-            System.ServiceProcess.ServiceBase[] ServicesToRun;
-            ServicesToRun =
-              new System.ServiceProcess.ServiceBase[] { new AsyncProcessingService() };
-            System.ServiceProcess.ServiceBase.Run(ServicesToRun);
+            ServiceBase[] ServicesToRun = new ServiceBase[] { new AsyncProcessingService() };
+            ServiceBase.Run(ServicesToRun);
         }
 
         /// <summary>
@@ -209,8 +192,8 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                 ThreadPool.SetMaxThreads(this._maxThreadCount, 0);
 
                 // Starts main thread invocation.
-                _mainThread = new Thread(new ThreadStart(MainThreadInvoke));
-                _mainThread.Start();
+                this._mainThread = new Thread(new ThreadStart(MainThreadInvoke));
+                this._mainThread.Start();
             }
         }
 
@@ -228,6 +211,7 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                 // Stop the process of asynchronous service and Waits to complete all worker thread to complete.            
                 this.StopAsyncProcess();
             }
+
             LogIF.InfoLog("ASYNC-SERVICE", GetMessage.GetMessageDescription("I0005"));
         }
 
@@ -245,6 +229,7 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                 // Stop the process of asynchronous service and Waits to complete all worker thread to complete.            
                 this.StopAsyncProcess();
             }
+
             LogIF.InfoLog("ASYNC-SERVICE", GetMessage.GetMessageDescription("I0006"));
         }
 
@@ -271,6 +256,7 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                 this.StopAsyncProcess();
                 base.OnCustomCommand(command);
             }
+            
             LogIF.InfoLog("ASYNC-SERVICE", GetMessage.GetMessageDescription("I0009"));
         }
 
@@ -310,14 +296,17 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                 try
                 {
                     // Get asynchronous task from the database.
-                    AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "SelectTask", "SelectTask", "SQL",
-                                                                                            new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+                    ApsParameterValue asyncParameterValue = new ApsParameterValue(
+                        "AsyncProcessingService", "SelectTask", "SelectTask", "SQL",
+                        new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+
                     asyncParameterValue.RegistrationDateTime = DateTime.Now - new TimeSpan(_maxNumberOfHours, 0, 0);
                     asyncParameterValue.NumberOfRetries = this._maxNumberOfRetries;
                     asyncParameterValue.CompletionDateTime = DateTime.Now - new TimeSpan(_maxNumberOfHours, 0, 0);
-                    LayerB layerB = new LayerB();
-                    AsyncProcessingServiceReturnValue selectedAsyncTask = (AsyncProcessingServiceReturnValue)layerB.DoBusinessLogic(
-                                                                              (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
+
+                    ApsLayerB layerB = new ApsLayerB();
+                    ApsReturnValue selectedAsyncTask = (ApsReturnValue)layerB.DoBusinessLogic(
+                        (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
 
                     // Existence check of asynchronous task
                     if (string.IsNullOrEmpty(selectedAsyncTask.UserId))
@@ -349,8 +338,10 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                     }
 
                     // Selected asynchronous task is assigned to a worker thread
-                    this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.START);
-                    LogIF.InfoLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("I0002"), selectedAsyncTask.TaskId));
+                    this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskStart);
+
+                    LogIF.InfoLog("ASYNC-SERVICE", string.Format(
+                        GetMessage.GetMessageDescription("I0002"), selectedAsyncTask.TaskId));
 
                     // Assign the task to the worker thread
                     ThreadPool.QueueUserWorkItem(new WaitCallback(this.WorkerThreadCallBack), (object)selectedAsyncTask);
@@ -360,7 +351,9 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                     // Service Failed due to unexpected exception.
                     this._isServiceException = true;
                     this._infiniteLoop = false;
-                    LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0000"), ex.Message.ToString()));
+
+                    LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                        GetMessage.GetMessageDescription("E0000"), ex.Message.ToString()));
                 }
             }
         }
@@ -375,7 +368,7 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
         /// <param name="asyncTask">Selected Asynchronous Task</param>
         private void WorkerThreadCallBack(object asyncTask)
         {
-            AsyncProcessingServiceReturnValue selectedAsyncTask = (AsyncProcessingServiceReturnValue)asyncTask;
+            ApsReturnValue selectedAsyncTask = (ApsReturnValue)asyncTask;
 
             // A new worker thread started an Async task
             this._workerThreadCount++;
@@ -383,27 +376,37 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
             try
             {
                 // To handle unstable "Register" state, when you invoke [Abort] at this state
-                if (selectedAsyncTask.CommandId == (int)AsyncProcessingServiceParameterValue.AsyncCommand.Abort)
+                if (selectedAsyncTask.CommandId == (int)AsyncCommand.Abort)
                 {
-                    throw new BusinessSystemException("APSAbortCommand", GetMessage.GetMessageDescription("CTE0004"));
+                    throw new BusinessSystemException(
+                        AsyncErrorMessageID.APSAbortCommand.ToString(),
+                        GetMessage.GetMessageDescription("CTE0004"));
                 }
 
                 // Call User Program to execute by using communication control function
-                AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "Start", "Start", "SQL",
-                                                                                        new MyUserInfo(selectedAsyncTask.UserId, selectedAsyncTask.TaskId.ToString()));
+                ApsParameterValue asyncParameterValue = new ApsParameterValue(
+                    "AsyncProcessingService", "Start", "Start", "SQL",
+                    new MyUserInfo(selectedAsyncTask.UserId, selectedAsyncTask.TaskId.ToString()));
+
                 asyncParameterValue.TaskId = selectedAsyncTask.TaskId;
                 asyncParameterValue.Data = selectedAsyncTask.Data;
+
                 CallController callController = new CallController(asyncParameterValue.User);
-                AsyncProcessingServiceReturnValue asyncReturnValue = (AsyncProcessingServiceReturnValue)callController.Invoke(selectedAsyncTask.ProcessName, asyncParameterValue);
+                ApsReturnValue asyncReturnValue = (ApsReturnValue)callController.Invoke(selectedAsyncTask.ProcessName, asyncParameterValue);
 
                 if (asyncReturnValue.ErrorFlag == true)
                 {
-                    if (asyncReturnValue.ErrorMessageID == "APSStopCommand")
+                    if (asyncReturnValue.ErrorMessageID == AsyncErrorMessageID.APSStopCommand.ToString())
                     {
-                        string exceptionInfo = "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine + "ErrorMessage: " + asyncReturnValue.ErrorMessage;
+                        string exceptionInfo = 
+                            "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine + 
+                            "ErrorMessage: " + asyncReturnValue.ErrorMessage;
+
                         // Asynchronous task is stopped due to user 'stop' command.
-                        this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.RETRY, exceptionInfo);
-                        LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0001") + asyncReturnValue.ErrorMessage, selectedAsyncTask.TaskId));
+                        this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskRetry, exceptionInfo);
+
+                        LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                            GetMessage.GetMessageDescription("E0001") + asyncReturnValue.ErrorMessage, selectedAsyncTask.TaskId));
                     }
                     else
                     {
@@ -413,41 +416,64 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
                         {
                             // Asynchronous task does not exceeds the maximum number of retries
                             // Updated as retry later
-                            string exceptionInfo = "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine + "ErrorMessage: " + asyncReturnValue.ErrorMessage;
+                            string exceptionInfo = 
+                                "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine +
+                                "ErrorMessage: " + asyncReturnValue.ErrorMessage;
+
                             selectedAsyncTask.NumberOfRetries += 1;
-                            this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.RETRY, exceptionInfo);
-                            LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0004"), selectedAsyncTask.TaskId));
+                            this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskRetry, exceptionInfo);
+
+                            LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                                GetMessage.GetMessageDescription("E0004"), selectedAsyncTask.TaskId));
                         }
                         else
                         {
                             // Asynchronous task exceeds maximum number of retries
                             // Update task as abort
-                            string exceptionInfo = "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine + "ErrorMessage: " + asyncReturnValue.ErrorMessage;
-                            this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.FAIL, exceptionInfo);
-                            LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0005"), selectedAsyncTask.TaskId));
+                            string exceptionInfo = 
+                                "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + Environment.NewLine +
+                                "ErrorMessage: " + asyncReturnValue.ErrorMessage;
+
+                            this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskFail, exceptionInfo);
+
+                            LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                                GetMessage.GetMessageDescription("E0005"), selectedAsyncTask.TaskId));
                         }
                     }
                 }
                 else
                 {
                     // Selected Asynchronous task is completed successfully.
-                    this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.SUCCESS);
-                    LogIF.InfoLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("I0003"), selectedAsyncTask.TaskId));
+                    this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskSuccess);
+                    LogIF.InfoLog("ASYNC-SERVICE", string.Format(
+                        GetMessage.GetMessageDescription("I0003"), selectedAsyncTask.TaskId));
                 }
             }
             catch (BusinessSystemException ex)
             {
                 // Asynchronous task is aborted due to BusinessSystemException sent by user program.
-                string exceptionInfo = "ErrorMessageID: " + ex.messageID + Environment.NewLine + "ErrorMessage: " + ex.Message;
-                this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.FAIL, exceptionInfo);
-                LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0006"), selectedAsyncTask.TaskId, ex.Message));
+                string exceptionInfo = 
+                    "ErrorMessageID: " + ex.messageID + Environment.NewLine +
+                    "ErrorMessage: " + ex.Message;
+
+                this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskFail, exceptionInfo);
+
+                LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                    GetMessage.GetMessageDescription("E0006"),
+                    selectedAsyncTask.TaskId, ex.ToString())); // ログ詳細化
             }
             catch (Exception ex)
             {
                 // Asynchronous task is aborted due to unexpected exception.
-                string exceptionInfo = "ErrorMessageID: " + ex.GetType().Name + Environment.NewLine + "ErrorMessage: " + ex.Message;
-                this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.FAIL, exceptionInfo);
-                LogIF.ErrorLog("ASYNC-SERVICE", string.Format(GetMessage.GetMessageDescription("E0006"), selectedAsyncTask.TaskId, ex.Message));
+                string exceptionInfo = 
+                    "ErrorMessageID: " + ex.GetType().Name + Environment.NewLine +
+                    "ErrorMessage: " + ex.Message;
+
+                this.UpdateAsyncTask(selectedAsyncTask, AsyncTaskUpdate.UpdateTaskFail, exceptionInfo);
+
+                LogIF.ErrorLog("ASYNC-SERVICE", string.Format(
+                    GetMessage.GetMessageDescription("E0006"),
+                    selectedAsyncTask.TaskId, ex.ToString())); // ログ詳細化
             }
             finally
             {
@@ -538,71 +564,54 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
         /// <param name="selectedAsyncTask">Selected Asynchronous Task</param>
         /// <param name="updateTask">SQL_Update_Method_name</param>
         /// <returns></returns>
-        public AsyncProcessingServiceReturnValue UpdateAsyncTask(AsyncProcessingServiceReturnValue selectedAsyncTask, string updateTask, string exceptionInfo = null)
+        public ApsReturnValue UpdateAsyncTask(ApsReturnValue selectedAsyncTask, AsyncTaskUpdate updateTask, string exceptionInfo = null)
         {
-            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", updateTask, updateTask, "SQL",
-                                                                                        new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+            ApsParameterValue asyncParameterValue = new ApsParameterValue(
+                "AsyncProcessingService", updateTask.ToString(), updateTask.ToString(), "SQL",
+                new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+
             asyncParameterValue.TaskId = selectedAsyncTask.TaskId;
 
             // Update databse based on task
             switch (updateTask)
             {
-                case AsyncTaskUpdate.START:
+                case AsyncTaskUpdate.UpdateTaskStart:
                     asyncParameterValue.ExecutionStartDateTime = DateTime.Now;
-                    asyncParameterValue.StatusId = (int)AsyncProcessingServiceParameterValue.AsyncStatus.Processing;
+                    asyncParameterValue.StatusId = (int)AsyncStatus.Processing;
                     break;
-                case AsyncTaskUpdate.RETRY:
+                    
+                case AsyncTaskUpdate.UpdateTaskRetry:
                     if (exceptionInfo.Length > 512)
                     {
                         exceptionInfo = exceptionInfo.Substring(0, 512);
                     }
                     asyncParameterValue.NumberOfRetries = selectedAsyncTask.NumberOfRetries;
                     asyncParameterValue.CompletionDateTime = DateTime.Now;
-                    asyncParameterValue.StatusId = (int)AsyncProcessingServiceParameterValue.AsyncStatus.AbnormalEnd;
+                    asyncParameterValue.StatusId = (int)AsyncStatus.AbnormalEnd;
                     asyncParameterValue.ExceptionInfo = exceptionInfo;
                     break;
-                case AsyncTaskUpdate.FAIL:
+                    
+                case AsyncTaskUpdate.UpdateTaskFail:
                     if (exceptionInfo.Length > 512)
                     {
                         exceptionInfo = exceptionInfo.Substring(0, 512);
                     }
                     asyncParameterValue.CompletionDateTime = DateTime.Now;
-                    asyncParameterValue.StatusId = (int)AsyncProcessingServiceParameterValue.AsyncStatus.Abort;
+                    asyncParameterValue.StatusId = (int)AsyncStatus.Abort;
                     asyncParameterValue.ExceptionInfo = exceptionInfo;
                     break;
-                case AsyncTaskUpdate.SUCCESS:
+                    
+                case AsyncTaskUpdate.UpdateTaskSuccess:
                     asyncParameterValue.CompletionDateTime = DateTime.Now;
                     asyncParameterValue.ProgressRate = 100;
-                    asyncParameterValue.StatusId = (int)AsyncProcessingServiceParameterValue.AsyncStatus.End;
+                    asyncParameterValue.StatusId = (int)AsyncStatus.End;
                     break;
             }
-            LayerB layerB = new LayerB();
-            AsyncProcessingServiceReturnValue asyncReturnValue = (AsyncProcessingServiceReturnValue)layerB.DoBusinessLogic(
-                                                                      (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
+            ApsLayerB layerB = new ApsLayerB();
+            ApsReturnValue asyncReturnValue = (ApsReturnValue)layerB.DoBusinessLogic(
+                (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
+
             return asyncReturnValue;
-        }
-
-        #endregion
-
-        #region DeserializeFromBase64
-
-        /// <summary>
-        /// Converts string data to byte array and byte array data to object.
-        /// </summary>
-        /// <param name="strBase64">Base64 String</param>
-        /// <returns>Deserialized Object</returns>
-        public object DeserializeFromBase64(string strBase64)
-        {
-            byte[] deserializeData = null;
-            MemoryStream memStream = new MemoryStream();
-            BinaryFormatter binForm = new BinaryFormatter();
-
-            deserializeData = CustomEncode.FromBase64String(strBase64);
-            memStream.Write(deserializeData, 0, deserializeData.Length);
-            memStream.Seek(0, SeekOrigin.Begin);
-            object obj = (object)binForm.Deserialize(memStream);
-
-            return obj;
         }
 
         #endregion
@@ -621,17 +630,22 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
             this._mainThread.Join();
 
             // Update stop command to all the running asynchronous task
-            AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "StopAllTask", "StopAllTask", "SQL",
-                                                                                    new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
-            asyncParameterValue.StatusId = (int)AsyncProcessingServiceParameterValue.AsyncStatus.Processing;
-            asyncParameterValue.CommandId = (int)AsyncProcessingServiceParameterValue.AsyncCommand.Stop;
-            LayerB layerB = new LayerB();
-            AsyncProcessingServiceReturnValue asyncReturnValue = (AsyncProcessingServiceReturnValue)layerB.DoBusinessLogic(
-                                                                  (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
+            ApsParameterValue asyncParameterValue = new ApsParameterValue(
+                "AsyncProcessingService", "StopAllTask", "StopAllTask", "SQL",
+                new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+
+            asyncParameterValue.StatusId = (int)AsyncStatus.Processing;
+            asyncParameterValue.CommandId = (int)AsyncCommand.Stop;
+
+            ApsLayerB layerB = new ApsLayerB();
+            ApsReturnValue asyncReturnValue = (ApsReturnValue)layerB.DoBusinessLogic(
+                (BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.ReadCommitted);
 
             if (asyncReturnValue.ErrorFlag)
             {
-                LogIF.ErrorLog("ASYNC-SERVICE", "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + "ErrorMessage: " + asyncReturnValue.ErrorMessage);
+                LogIF.ErrorLog("ASYNC-SERVICE", 
+                    "ErrorMessageID: " + asyncReturnValue.ErrorMessageID + 
+                    "ErrorMessage: " + asyncReturnValue.ErrorMessage);
             }
 
             // Wait for all worker thread to be complete
@@ -659,9 +673,11 @@ namespace Touryo.Infrastructure.Framework.AsyncProcessingService
             try
             {
                 // Checks for successful connection to the database.
-                AsyncProcessingServiceParameterValue asyncParameterValue = new AsyncProcessingServiceParameterValue("AsyncProcessingService", "TestConnection", "TestConnection", "SQL",
-                                                                                        new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
-                LayerB layerB = new LayerB();
+                ApsParameterValue asyncParameterValue = new ApsParameterValue(
+                    "AsyncProcessingService", "TestConnection", "TestConnection", "SQL",
+                    new MyUserInfo("AsyncProcessingService", "AsyncProcessingService"));
+
+                ApsLayerB layerB = new ApsLayerB();
                 layerB.DoBusinessLogic((BaseParameterValue)asyncParameterValue, DbEnum.IsolationLevelEnum.NoTransaction);
 
                 // Asynchronous Processing Service initializes successfully without any errors

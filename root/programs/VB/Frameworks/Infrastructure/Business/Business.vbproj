@@ -60,24 +60,29 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTouryo.DamManagedOdp">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamManagedOdp.dll</HintPath>
+      <HintPath>..\..\..\..\CS\Frameworks\Infrastructure\Build\OpenTouryo.DamManagedOdp.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.DamMySQL">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamMySQL.dll</HintPath>
+      <HintPath>..\..\..\..\CS\Frameworks\Infrastructure\Build\OpenTouryo.DamMySQL.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.DamPstGrS">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.DamPstGrS.dll</HintPath>
+      <HintPath>..\..\..\..\CS\Frameworks\Infrastructure\Build\OpenTouryo.DamPstGrS.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.Framework">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.Framework.dll</HintPath>
+      <HintPath>..\..\..\..\CS\Frameworks\Infrastructure\Build\OpenTouryo.Framework.dll</HintPath>
     </Reference>
     <Reference Include="OpenTouryo.Public">
-      <HintPath>..\..\..\..\C#\Frameworks\Infrastructure\Build\OpenTouryo.Public.dll</HintPath>
+      <HintPath>..\..\..\..\CS\Frameworks\Infrastructure\Build\OpenTouryo.Public.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -89,10 +94,11 @@
     <Import Include="System.Diagnostics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceParameterValue.vb" />
-    <Compile Include="AsyncProcessingService\AsyncProcessingServiceReturnValue.vb" />
-    <Compile Include="AsyncProcessingService\LayerB.vb" />
-    <Compile Include="AsyncProcessingService\LayerD.vb" />
+    <Compile Include="AsyncProcessingService\ApsLayerB.vb" />
+    <Compile Include="AsyncProcessingService\ApsLayerD.vb" />
+    <Compile Include="AsyncProcessingService\ApsParameterValue.vb" />
+    <Compile Include="AsyncProcessingService\ApsReturnValue.vb" />
+    <Compile Include="AsyncProcessingService\ApsUtility.vb" />
     <Compile Include="AsyncProcessingService\MyApsBaseLogic.vb" />
     <Compile Include="Business\MyFcBaseLogic.vb" />
     <Compile Include="Common\MyParameterValue.vb" />
@@ -121,6 +127,9 @@
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\MyReturnValue.vb" />
@@ -142,6 +151,7 @@
     <Compile Include="Util\GMTMaster.vb" />
     <Compile Include="Str\JISX0208_1983Checker.vb" />
     <Compile Include="Util\MyAttribute.vb" />
+    <Compile Include="Util\MyCmnFunction.vb" />
     <Compile Include="Util\MyLiteral.vb" />
     <Compile Include="Util\MySubsysInfo.vb" />
     <Compile Include="Util\MyUserInfo.vb" />

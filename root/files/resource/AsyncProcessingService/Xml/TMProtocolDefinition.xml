@@ -9,23 +9,10 @@
   <!ATTLIST Url id ID #REQUIRED value CDATA #REQUIRED>
   <!ATTLIST Prop id ID #REQUIRED value CDATA #REQUIRED>
   <!ATTLIST Transmission id ID #REQUIRED protocol (1 | 2) #REQUIRED 
-		url CDATA #IMPLIED url_ref IDREF #IMPLIED timeout CDATA #IMPLIED prop_ref IDREF #IMPLIED>
+    url CDATA #IMPLIED url_ref IDREF #IMPLIED timeout CDATA #IMPLIED prop_ref IDREF #IMPLIED>
 ]>
 <!-- idの先頭には、数字を使用できない。 -->
 <!-- protocol：1=InProcess、2=WebService -->
 <TMD>
-  <!-- マスタ データ -->
-
-  <!-- 接続URL（asmx単位に定義する） -->
-  <Url id="url_a" value="http://localhost/ASPNETWebService/ServiceForFx.asmx"/>
-  <Url id="url_b" value="http://localhost/ASPNETWebService/WCFHTTPSvcForFx.svc"/>
-  <Url id="url_c" value="net.tcp://localhost:7777/WCFService/WCFTCPSvcForFx/"/>
-
-  <!-- 接続オプション（必要に応じて） -->
-  <Prop id="prop_a" value="aaa=AAA;bbb=BBB;ccc=CCC;"/>
-
-  <!-- 接続先 データ -->
-
-  <!-- インプロセス -->
-  <Transmission id="AsyncSvc_sample" protocol="1"/>
+  <Transmission id="AAA" protocol="1"/>
 </TMD>

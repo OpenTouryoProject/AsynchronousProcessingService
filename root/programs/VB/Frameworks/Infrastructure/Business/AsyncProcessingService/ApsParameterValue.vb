@@ -19,15 +19,18 @@
 #End Region
 
 '**********************************************************************************
-'* クラス名        ：AsyncProcessingServiceParameterValue
-'* クラス日本語名  ：AsyncProcessingServiceParameterValue
+'* クラス名        ：ApsParameterValue
+'* クラス日本語名  ：ApsParameterValue
 '*
 '*  日時        更新者            内容
 '*  ----------  ----------------  -------------------------------------------------
 '*  11/28/2014  Supragyan         Paramter Value class for Asynchronous Processing Service
 '*  04/15/2015  Sandeep           Changed datatype of ProgressRate to decimal.
+'*  2018/08/24  西野 大介         クラス名称の変更（ ---> Aps）
+'*  2018/08/24  西野 大介         列挙型と列挙型処理クラスの移動
 '**********************************************************************************
 
+Imports System
 Imports System.Reflection
 
 Imports Touryo.Infrastructure.Business.Common
@@ -37,7 +40,7 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 	''' <summary>
 	''' Paramter Value class for Asynchronous Processing Service
 	''' </summary>
-	Public Class AsyncProcessingServiceParameterValue
+	Public Class ApsParameterValue
 		Inherits MyParameterValue
 		''' <summary>汎用エリア</summary>
 		Public Obj As Object
@@ -90,95 +93,5 @@ Namespace Touryo.Infrastructure.Business.AsyncProcessingService
 		End Sub
 
 		#End Region
-
-		#Region "AsyncStatus"
-
-		''' <summary>
-		''' AsyncStatus Enum for storing all status
-		''' </summary>
-		Public Enum AsyncStatus
-			''' <summary>Register</summary>
-			<StringValue("Register")> _
-			Register = 1
-
-			''' <summary>Processing</summary>
-			<StringValue("Processing")> _
-			Processing
-
-			''' <summary>End</summary>
-			<StringValue("End")> _
-			[End]
-
-			''' <summary>AbnormalEnd</summary>
-			<StringValue("AbnormalEnd")> _
-			AbnormalEnd
-
-			''' <summary>Abort</summary>
-			<StringValue("Abort")> _
-			Abort
-		End Enum
-
-		#End Region
-
-		#Region "AsyncCommand"
-
-		''' <summary>
-		''' AsyncCommand Enum for storing command values
-		''' </summary>
-		Public Enum AsyncCommand
-			''' <summary>Stop</summary>
-			<StringValue("Stop")> _
-			[Stop] = 1
-
-			''' <summary>Abort</summary>
-			<StringValue("Abort")> _
-			Abort
-		End Enum
-
-		#End Region
-	End Class
-
-	''' <summary>
-	'''  To get the string value
-	''' </summary>
-	Public Class StringValueAttribute
-		Inherits System.Attribute
-		Private _value As String
-
-		''' <summary>StringValueAttribute</summary>
-		''' <param name="value">value</param>
-		Public Sub New(value As String)
-			_value = value
-		End Sub
-
-		''' <summary>Value</summary>
-		Public ReadOnly Property Value() As String
-			Get
-				Return _value
-			End Get
-		End Property
-	End Class
-
-	''' <summary>
-	'''  Class that holds the Enum values string
-	''' </summary>
-	Public Class StringEnum
-		''' <summary>
-		'''  To get the string value from Enum value
-		''' </summary>
-		''' <param name="value">Enum value</param>
-		''' <returns>String value of Enum</returns>
-		Public Shared Function GetStringValue(value As [Enum]) As String
-			Dim output As String = Nothing
-			Dim type As Type = value.[GetType]()
-
-			' Gets the 'StringValueAttribute'
-			Dim fi As FieldInfo = type.GetField(value.ToString())
-            Dim attrs As StringValueAttribute() = TryCast(fi.GetCustomAttributes(GetType(StringValueAttribute), False), StringValueAttribute())
-			If attrs.Length > 0 Then
-				output = attrs(0).Value
-			End If
-			Return output
-		End Function
 	End Class
 End Namespace

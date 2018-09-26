@@ -195,12 +195,12 @@ namespace Touryo.Infrastructure.Business.AsyncProcessingService
 
                 if (parameterValue.ActionType.Split('%')[0] == "SQL")
                 {
-                // SQL Server / SQL Client用のDamを生成
-                damABT = new DamSqlSvr();
-                damAMT = new DamSqlSvr();
+                    // SQL Server / SQL Client用のDamを生成
+                    damABT = new DamSqlSvr();
+                    damAMT = new DamSqlSvr();
 
-                // 接続文字列をロード
-                connstring = GetConfigParameter.GetConnectionString("ConnectionString_SQL");
+                    // 接続文字列をロード
+                    connstring = GetConfigParameter.GetConnectionString("ConnectionString_SQL");
                 }
                 else if (parameterValue.ActionType.Split('%')[0] == "OLE")
                 {
@@ -662,7 +662,7 @@ namespace Touryo.Infrastructure.Business.AsyncProcessingService
 
                     // Log4Netへログ出力
                     LogIF.ErrorLog("ACCESS", strLogMessage);
-                    
+
                     // スタックトレースを保って InnerException を throw
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }

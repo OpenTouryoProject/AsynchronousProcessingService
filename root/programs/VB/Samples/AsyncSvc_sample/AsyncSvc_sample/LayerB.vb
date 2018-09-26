@@ -6,7 +6,7 @@
 
 '**********************************************************************************
 '* クラス名        ：LayerB
-'* クラス日本語名  ：LayerB
+'* クラス日本語名  ：非同期タスクのシミュレーション実行
 '*
 '*  日時        更新者            内容
 '*  ----------  ----------------  -------------------------------------------------
@@ -21,16 +21,21 @@
 '*  28/08/2015   Sandeep          Resolved transaction timeout issue by using DamKeyForABT and DamKeyForAMT properties.
 '*  07/06/2016   Sandeep          Implemented code that respond to various test cases, other than success state.
 '*  08/06/2016   Sandeep          Implemented method to update the command of selected task.
+'*  2018/08/24  西野 大介         SampleをBinaryからJSONのSerializeへ変更。
+'*  2018/08/24  西野 大介         Utilityメソッドを部品化と確率計算の修正。
 '**********************************************************************************
 
 Imports System
+Imports System.Threading
+Imports System.Collections.Generic
+Imports System.Security.Cryptography
+
+Imports Newtonsoft.Json
 
 Imports Touryo.Infrastructure.Business.AsyncProcessingService
-Imports Touryo.Infrastructure.Business.Business
-Imports Touryo.Infrastructure.Business.Util
+Imports Touryo.Infrastructure.Framework.AsyncProcessingService
 Imports Touryo.Infrastructure.Framework.Exceptions
 Imports Touryo.Infrastructure.Framework.Util
-Imports Touryo.Infrastructure.Public.Str
 Imports Touryo.Infrastructure.Public.Util
 
 ''' <summary>
@@ -38,11 +43,29 @@ Imports Touryo.Infrastructure.Public.Util
 ''' </summary>
 Public Class LayerB
     Inherits MyApsBaseLogic
-
 #Region "Member declartion"
 
-    ' Number of seconds
+    ''' <summary>Constant values</summary>
+    Const SUCCESS_STATE As UInteger = 100
+
+    ''' <summary>Task progress rate</summary>
+    Private ProgressRate As UInteger
+
+#Region "SampleのSimulation"
+
+    ''' <summary>Number of seconds</summary>
     Private NumberOfSeconds As Integer
+
+    ''' <summary>Max progress rate</summary>
+    Private MaxProgressRate As UInteger
+
+    ''' <summary>Stop probability</summary>
+    Private StopPercentage As UInteger
+
+    ''' <summary>Abort probability</summary>
+    Private AbortPercentage As UInteger
+
+#End Region
 
 #End Region
 
@@ -50,6 +73,8 @@ Public Class LayerB
 
     ''' <summary>Constructor</summary>
     Public Sub New()
+        '#Region "SampleのSimulation"
+
         ' Number of seconds to sleep the thread.
         Dim numberOfSeconds As String = GetConfigParameter.GetConfigValue("FxSleepUserProcess")
         If Not String.IsNullOrEmpty(numberOfSeconds) Then
@@ -57,145 +82,189 @@ Public Class LayerB
         Else
             Me.NumberOfSeconds = 5
         End If
+
+        ' Max progress rate
+        Dim maxProgressRate As String = GetConfigParameter.GetConfigValue("FxMaxProgressRate")
+        If Not String.IsNullOrEmpty(maxProgressRate) Then
+            Me.MaxProgressRate = UInteger.Parse(maxProgressRate)
+        Else
+            Me.MaxProgressRate = 30
+        End If
+
+        ' Stop probability.
+        Dim stopPercentage As String = GetConfigParameter.GetConfigValue("FxStopPercentage")
+        If Not String.IsNullOrEmpty(stopPercentage) Then
+            Me.StopPercentage = UInteger.Parse(stopPercentage)
+        Else
+            Me.StopPercentage = 3
+        End If
+
+        ' Abort probability.
+        Dim abortPercentage As String = GetConfigParameter.GetConfigValue("FxAbortPercentage")
+        If Not String.IsNullOrEmpty(abortPercentage) Then
+            Me.AbortPercentage = UInteger.Parse(abortPercentage)
+        Else
+            Me.AbortPercentage = 1
+
+            '#End Region
+        End If
     End Sub
 
 #End Region
 
 #Region "Member methods"
 
-#Region "Utilityメソッド"
-
-    ''' <summary>
-    '''  Converts base64 string to deserialized byte array.
-    ''' </summary>
-    ''' <param name="base64String">Base64 String</param>
-    ''' <returns>byte array</returns>
-    Private Function DeserializeFromBase64String(base64String As String) As Byte()
-        Dim deserializeData As Byte() = Nothing
-        If String.IsNullOrEmpty(base64String) Then
-            deserializeData = CustomEncode.FromBase64String(base64String)
-        End If
-        Return deserializeData
-    End Function
-
-    ''' <summary>
-    '''  Get command information from database. 
-    ''' </summary>
-    ''' <param name="taskID">asynchronous task id</param>
-    ''' <param name="userReturnValue">asynchronous return value</param>
-    Private Sub GetCommandValue(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
-        ' Sets parameters of AsyncProcessingServiceParameterValue to get command value.
-        Dim asyncParameterValue As New AsyncProcessingServiceParameterValue("AsyncProcessingService", "SelectCommand", "SelectCommand", "SQL", New MyUserInfo("AsyncProcessingService", "AsyncProcessingService"))
-        asyncParameterValue.TaskId = taskID
-
-        ' Calls data access part of asynchronous processing service.
-        Dim myDao As New LayerD(Me.GetDam(Me.DamKeyforAMT))
-        myDao.SelectCommand(asyncParameterValue, userReturnValue)
-        userReturnValue.CommandId = CInt(userReturnValue.Obj)
-    End Sub
-
-    ''' <summary>
-    '''  Resumes asynchronous process in the middle of the processing.
-    ''' </summary>
-    ''' <param name="taskID">Task ID</param>
-    ''' <param name="userReturnValue">asynchronous return value</param>
-    Private Sub ResumeProcessing(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
-        ' Sets parameters of AsyncProcessingServiceParameterValue to resume asynchronous process in the middle of the processing.
-        Dim asyncParameterValue As New AsyncProcessingServiceParameterValue("AsyncProcessingService", "UpdateTaskCommand", "UpdateTaskCommand", "SQL", New MyUserInfo("AsyncProcessingService", "AsyncProcessingService"))
-        asyncParameterValue.TaskId = taskID
-        asyncParameterValue.CommandId = 0
-
-        ' Calls data access part of asynchronous processing service.
-        Dim myDao As New LayerD(Me.GetDam(Me.DamKeyforAMT))
-        myDao.UpdateTaskCommand(asyncParameterValue, userReturnValue)
-    End Sub
-
-    ''' <summary>
-    '''  Updates the progress rate in the database. 
-    ''' </summary>
-    ''' <param name="taskID">asynchronous task id</param>
-    ''' <param name="progressRate">progress rate</param>
-    Private Sub UpdateProgressRate(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue, progressRate As Decimal)
-        ' Sets parameters of AsyncProcessingServiceParameterValue to Update progress rate
-        Dim asyncParameterValue As New AsyncProcessingServiceParameterValue("AsyncProcessingService", "UpdateTaskProgress", "UpdateTaskProgress", "SQL", New MyUserInfo("AsyncProcessingService", "AsyncProcessingService"))
-        asyncParameterValue.TaskId = taskID
-        asyncParameterValue.ProgressRate = progressRate
-
-        ' Calls data access part of asynchronous processing service.
-        Dim myDao As New LayerD(Me.GetDam(Me.DamKeyforAMT))
-        myDao.UpdateTaskProgress(asyncParameterValue, userReturnValue)
-    End Sub
-
-#End Region
-
 #Region "非同期タスクの実行"
 
     ''' <summary>
     ''' Initiate the processing of asynchronous task.
     ''' </summary>
-    ''' <param name="userParameterValue">asynchronous parameter values</param>
-    Public Sub UOC_Start(userParameterValue As AsyncProcessingServiceParameterValue)
+    ''' <param name="parameterValue">asynchronous parameter values</param>
+    Public Sub UOC_Start(parameterValue As ApsParameterValue)
         ' Generates a return value class.
-        Dim userReturnValue As New AsyncProcessingServiceReturnValue()
-        Me.ReturnValue = userReturnValue
+        ' 戻り値クラスを生成する。
+        Dim returnValue As New ApsReturnValue()
 
-        ' Get array data from serialized base64 string.
-        Dim arrayData As Byte() = Me.DeserializeFromBase64String(userParameterValue.Data)
+        Me.ReturnValue = returnValue
+
+        ' Get array data from serialized json string.
+        Dim listData As List(Of Integer) = JsonConvert.DeserializeObject(Of List(Of Integer))(parameterValue.Data)
 
         ' Get command information from database to check for retry.
-        Me.GetCommandValue(userParameterValue.TaskId, userReturnValue)
+        ' データベースからコマンド情報を取得して確認する。
+        ApsUtility.GetCommandValue(parameterValue.TaskId, returnValue, Me.GetDam(Me.DamKeyforAMT))
 
-        If userReturnValue.CommandId = CInt(AsyncProcessingServiceParameterValue.AsyncCommand.[Stop]) Then
+        If returnValue.CommandId = CInt(AsyncCommand.[Stop]) Then
             ' Retry task: to resume asynchronous process in the middle of the processing.
-            Me.ResumeProcessing(userParameterValue.TaskId, userReturnValue)
-            ' Otherwise, implement code to initiating a new task. 
-            '...
+            ' 再試行タスク：処理の途中で停止された非同期処理を再開する。
+            ApsUtility.ResumeProcessing(parameterValue.TaskId, returnValue, Me.GetDam(Me.DamKeyforAMT))
+
+            ' Updated progress rate will be taken as random number.
+            ' 進捗率をインクリメントする。
+            ProgressRate = Me.GenerateProgressRate(ProgressRate)
         Else
+            ' Otherwise, implement code to initiating a new task. 
+            ' それ以外の場合は、新しいタスクを開始するコードを実装する。
+            '...
+            ' Hence, initializing progress rate to zero.
+            ' したがって、進捗率をゼロに設定する。
+            ProgressRate = 0
         End If
 
         ' Updates the progress rate and handles abnormal termination of the process.
-        Me.Update(userParameterValue.TaskId, userReturnValue)
+        ' 進捗率をインクリメントしたり、プロセスの異常終了を処理したり。
+        Me.Update(parameterValue.TaskId, returnValue)
     End Sub
-
 
     ''' <summary>
     '''  Updates the progress rate and handles abnormal termination of the process.
     ''' </summary>
     ''' <param name="taskID">Task ID</param>
-    ''' <param name="userReturnValue">user parameter value</param>
-    Private Sub Update(taskID As Integer, userReturnValue As AsyncProcessingServiceReturnValue)
+    ''' <param name="returnValue">user parameter value</param>
+    Private Sub Update(taskID As Integer, returnValue As ApsReturnValue)
         ' Place the following statements in the loop, till the completion of task.
-        ' AsyncProcess: Loop-Start
+        ' タスクが完了するまで、ループ内の処理を実行する。
 
-        ' Get command information from database to check for retry.
-        Me.GetCommandValue(taskID, userReturnValue)
+        While True
+            ' Get command information from database to check for retry.
+            ' データベースからコマンド情報を取得して、CommandIdを確認。
+            ApsUtility.GetCommandValue(taskID, returnValue, Me.GetDam(Me.DamKeyforAMT))
 
-        Select Case userReturnValue.CommandId
-            Case CInt(AsyncProcessingServiceParameterValue.AsyncCommand.[Stop])
-                ' If you want to retry, then throw the following exception.
-                Throw New BusinessApplicationException("APSStopCommand", GetMessage.GetMessageDescription("CTE0003"), "")
-            Case CInt(AsyncProcessingServiceParameterValue.AsyncCommand.Abort)
-                ' Implement code to forcefully Abort the task.
-                '...
+            Select Case returnValue.CommandId
+                Case CInt(AsyncCommand.[Stop])
 
-                ' If the task is abnormal terminated, then throw the exception .
-                Throw New BusinessSystemException("APSAbortCommand", GetMessage.GetMessageDescription("CTE0004"))
-            Case Else
-                ' Update the progress rate in database.
-                Me.UpdateProgressRate(taskID, userReturnValue, 50)
+                    ' If you want to retry, then throw the following exception.
+                    ' 処理の途中で停止する場合は、次の例外をスロー。
 
-                ' Sleeps the thread, to minimize the CPU utilization.
-                System.Threading.Thread.Sleep(Me.NumberOfSeconds * 1000)
-                Exit Select
-        End Select
-        'AsyncProcess: Loop-End
+                    Throw New BusinessApplicationException(AsyncErrorMessageID.APSStopCommand.ToString(), GetMessage.GetMessageDescription("CTE0003"), "")
 
-        ' If loop ends with no error, that indicates the task is completed sucessfully.
-        Return
+                Case CInt(AsyncCommand.Abort)
+
+                    ' Implement code to forcefully Abort the task.
+                    ' If the task is abnormal terminated, then throw the exception.
+                    ' 強制的にタスクを中断する場合は、例外をスロー。
+
+                    Throw New BusinessSystemException(AsyncErrorMessageID.APSAbortCommand.ToString(), GetMessage.GetMessageDescription("CTE0004"))
+                Case Else
+
+                    ' Generates new progress rate of the task.
+                    ' 進捗率をインクリメント
+                    ProgressRate = Me.GenerateProgressRate(ProgressRate)
+
+                    ' Update the progress rate in database.
+                    ' データベースの進捗率を更新。
+                    ApsUtility.UpdateProgressRate(taskID, returnValue, ProgressRate, Me.GetDam(Me.DamKeyforAMT))
+
+                    ' 非同期タスクのシミュレーション
+                    If Me.Fortune(Me.AbortPercentage) Then
+                        ' Update ABORT command to database
+                        ' データベースのコマンドをABORTに更新。
+                        ApsUtility.UpdateTaskCommand(taskID, CInt(AsyncCommand.Abort), returnValue, Me.GetDam(Me.DamKeyforAMT))
+                    ElseIf Me.Fortune(Me.StopPercentage) Then
+                        ' Update STOP command to database
+                        ' データベースのコマンドをSTOPに更新。
+                        ApsUtility.UpdateTaskCommand(taskID, CInt(AsyncCommand.[Stop]), returnValue, Me.GetDam(Me.DamKeyforAMT))
+                    ElseIf SUCCESS_STATE <= ProgressRate Then
+                        ' Task is completed sucessfully.
+                        ' タスクは正常に完了
+                        Return
+                    Else
+                        ' タスクは継続する。
+                        Thread.Sleep(Me.NumberOfSeconds * 1000)
+                    End If
+
+                    Exit Select
+            End Select
+        End While
     End Sub
 
-#End Region
+#Region "SampleのSimulation"
+
+    ''' <summary>
+    '''  Generates new progress rate for the task based on last progress rate in increasing order.
+    ''' </summary>
+    ''' <param name="lastProgressRate">Last progress rate</param>
+    ''' <returns>New progress rate</returns>
+    Private Function GenerateProgressRate(lastProgressRate As UInteger) As UInteger
+        '/ Sleeps the thread, to minimize the CPU utilization.
+        'Thread.Sleep(this.NumberOfSeconds * 1000);
+
+        '/ Generate new progress rate
+        'Random randProgressRate = new Random();
+        'return randProgressRate.Next(lastProgressRate + 1, SUCCESS_STATE + 1);
+
+        ' 乱数の30の剰余を足し込む。
+        lastProgressRate += (Me.GenerateRandomUint() Mod 30)
+
+        If SUCCESS_STATE <= lastProgressRate Then
+            ' 100%以上の場合、100%
+            Return SUCCESS_STATE
+        Else
+            ' 100%未満の場合、その値
+            Return lastProgressRate
+        End If
+    End Function
+
+    ''' <summary>真偽の占い</summary>
+    ''' <param name="percentage">確率</param>
+    ''' <returns>真偽</returns>
+    Private Function Fortune(percentage As UInteger) As Boolean
+        Return ((Me.GenerateRandomUint() Mod 100) < percentage)
+    End Function
+
+    ''' <summary>GenerateRandomUint</summary>
+    ''' <returns>Random uint</returns>
+    Private Function GenerateRandomUint() As UInteger
+        Dim bs As Byte() = New Byte(4 - 1) {}
+        Dim rng As New RNGCryptoServiceProvider()
+        rng.GetBytes(bs)
+        rng.Dispose()
+        Return BitConverter.ToUInt32(bs, 0)
+    End Function
 
 #End Region
 
+#End Region
+
+#End Region
 End Class

@@ -19,13 +19,14 @@
 #endregion
 
 //**********************************************************************************
-//* クラス名        ：AsyncProcessingServiceReturnValue
-//* クラス日本語名  ：AsyncProcessingServiceReturnValue
+//* クラス名        ：ApsReturnValue
+//* クラス日本語名  ：ApsReturnValue
 //*
 //*  日時        更新者            内容
 //*  ----------  ----------------  -------------------------------------------------
 //*  11/28/2014  Supragyan         Paramter Return Value class for Asynchronous Processing Service
 //*  04/15/2015  Sandeep           Changed datatype of ProgressRate to decimal.
+//*  2018/08/24  西野 大介         クラス名称の変更（ ---> Aps）
 //**********************************************************************************
 
 using System;
@@ -33,11 +34,10 @@ using Touryo.Infrastructure.Business.Common;
 
 namespace Touryo.Infrastructure.Business.AsyncProcessingService
 {
-
     /// <summary>
     /// Paramter Return Value class for Asynchronous Processing Service
     /// </summary>
-    public class AsyncProcessingServiceReturnValue : MyReturnValue
+    public class ApsReturnValue : MyReturnValue
     {
         /// <summary>汎用エリア</summary>
         public object Obj;
@@ -81,5 +81,4 @@ namespace Touryo.Infrastructure.Business.AsyncProcessingService
         /// <summary>ExceptionInfo</summary>
         public string ExceptionInfo;
     }
-
 }
