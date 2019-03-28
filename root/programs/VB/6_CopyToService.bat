@@ -1,1 +1,0 @@
-xcopy /E /Y "Samples\AsyncSvc_sample\AsyncSvc_sample\bin\Debug" "..\CS\Frameworks\Infrastructure\AsyncProcessingService\bin\Debug\"
